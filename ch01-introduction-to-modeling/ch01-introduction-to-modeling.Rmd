@@ -1,0 +1,27 @@
+---
+title: "Datacamp: Modeling with Data in the Tidyverse"
+subtitle: "Chapter 1: Introduction to Modeling"
+author: "Clare Gibson"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    toc: true
+    number_sections: true
+    toc_float: true
+    theme: cosmo
+    code_folding: hide
+---
+
+```{r setup, include=FALSE}
+# Knitr Options
+knitr::opts_chunk$set(
+	echo = TRUE,
+	message = FALSE,
+	warning = FALSE
+)
+```
+
+# Summary
+This chapter will introduce you to some background theory and terminology for modeling, in particular, the general modeling framework, the difference between modeling for explanation and modeling for prediction, and the modeling problem. Furthermore, you'll start performing your first exploratory data analysis, a crucial first step before any formal modeling.
+
+# Background on Modeling for Explanation
