@@ -9,12 +9,15 @@ output:
     number_sections: true
     toc_float: true
     theme: cosmo
-    code_folding: hide
+    code_folding: show
 ---
 
 ```{r setup, include=FALSE}
+# Load knitr package
+library(knitr)
+
 # Knitr Options
-knitr::opts_chunk$set(
+opts_chunk$set(
 	echo = TRUE,
 	message = FALSE,
 	warning = FALSE
@@ -25,3 +28,88 @@ knitr::opts_chunk$set(
 This chapter will introduce you to some background theory and terminology for modeling, in particular, the general modeling framework, the difference between modeling for explanation and modeling for prediction, and the modeling problem. Furthermore, you'll start performing your first exploratory data analysis, a crucial first step before any formal modeling.
 
 # Background on Modeling for Explanation
+## General Modeling Framework Formula
+
+The **general modeling framework formula** is $y = f(\vec{x}) + \epsilon$ where:
+
+* $y$ is the outcome variable of interest
+* $\vec{x}$ is the set of explanatory or predictor variables used to inform your model
+* $f()$ is a mathematical function of the relationship between $y$ and $\vec{x}$ AKA *the signal*
+* $\epsilon$ is the unsystematic error component AKA *the noise*
+
+## Two Modeling Scenarios
+Modeling for either:
+
+* Explanation: $\vec{x}$ are *explanatory variables*
+* Prediction: $\vec{x}$ are *predictor variables*
+
+## Modeling for Explanation Example
+At the end of academic terms at many universities and colleges, instructors are given teaching evaluation scores by students. A study conducted at the [University of Texas Austin](https://www.utexas.edu/) investigated whether **differences in scores could be explained by differences in instructor attributes**. The **outcome variable** ($y$) is average teaching `score` for different courses. **Explanatory variables** include: `rank`, `gender` (which at the time of this study was recorded as a binary variable: male or female), `age` and even the instructor's "beauty score" `bty_avg`, we'll talk more about that later. 
+
+The `evals` dataframe included in the `moderndive` package contains this data. The `moderndive` package is used in [ModernDive.com](https://moderndive.com/), an open-source written and published electronic textbook on statistical and data sciences. This package includes other data and functions you'll be using in this course. Let's preview the data using the `glimpse` function from the `dplyr` package.
+
+```{r glimpse-evals, message=FALSE, warning=FALSE}
+# Load packages
+library(dplyr)
+library(moderndive)
+
+# Preview the evals data
+glimpse(evals)
+```
+
+Observe that there are 463 instructors and 14 variables in this data frame.
+
+## Exploratory Data Analysis
+A crucial first step is an **exploratory data analysis**, or **EDA**. EDA gives you a sense of your data and it can help inform model construction. There are three basic steps to an EDA:
+
+* Looking at the data
+* Creating visualizations
+* Computing summary statistics
+
+Let's do this for the outcome variable `score`.
+
+Since `score` is numerical, let's construct a histogram to visualize its distribution by using a `geom-histogram` from the `ggplot2` package, where the x-aesthetic is mapped to `score`. Let's also set a `binwidth` of 0.25.
+
+```{r hist-score}
+# Load packages
+library(ggplot2)
+
+# Build histogram for score
+ggplot(evals, aes(x = score)) +
+  geom_histogram(binwidth = 0.25) +
+  labs(x = "teaching score", y = "count")
+```
+
+The largest score is 5 and most scores are between about 3-5. But what's the average? Let's perform the third step in our EDA, computing summary statistics.
+
+Summary statistics summarize many values with a single value called a statistic. Let's compute three such summary statistics using the `summarize()` function. 
+```{r summary-score}
+evals %>% 
+  summarise(mean_score = mean(score),
+            median_score = median(score),
+            sd_score = sd(score))
+```
+
+The mean, or average, score is 4.17, whereas the median of 4.3 indicates about half the instructors had scores below 4.3 and about half above. The standard deviation, a measure of spread and variation, is 0.544. 
+
+# Exploratory Visualization of Age
+Let's perform an exploratory data analysis (EDA) of the numerical explanatory variable `age`. You should always perform an exploratory analysis of your variables before any formal modeling. This will give you a sense of your variable's distributions, any outliers, and any patterns that might be useful when constructing your eventual model.
+
+```{r hist-age}
+# Plot the histogram
+ggplot(evals, aes(x = age)) +
+  geom_histogram(binwidth = 5) +
+  labs(x = "age", y = "count")
+```
+
+# Numerical Summaries of Age
+Let's continue our exploratory data analysis of the numerical explanatory variable `age` by computing summary statistics. Summary statistics take many values and summarize them with a single value. Let's compute three such values using `dplyr` data wrangling: mean (AKA the average), the median (the middle value), and the standard deviation (a measure of spread/variation).
+
+```{r summary-age}
+# Compute summary stats
+evals %>%
+  summarise(mean_age = mean(age),
+            median_age = median(age),
+            sd_age = sd(age))
+```
+
