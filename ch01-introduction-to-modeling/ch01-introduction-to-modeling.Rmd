@@ -3,13 +3,7 @@ title: "Datacamp: Modeling with Data in the Tidyverse"
 subtitle: "Chapter 1: Introduction to Modeling"
 author: "Clare Gibson"
 date: "`r Sys.Date()`"
-output: 
-  html_document:
-    toc: true
-    number_sections: true
-    toc_float: true
-    theme: cosmo
-    code_folding: show
+output: github_document
 ---
 
 ```{r setup, include=FALSE}
