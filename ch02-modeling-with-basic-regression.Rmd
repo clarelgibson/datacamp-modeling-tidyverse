@@ -1,0 +1,183 @@
+---
+title: "Datacamp: Modeling with Data in the Tidyverse"
+subtitle: "Chapter 2: Modeling with Basic Regression"
+author: "Clare Gibson"
+date: "`r Sys.Date()`"
+output: 
+  prettydoc::html_pretty:
+    toc: true
+    theme: architect
+    highlight: github
+---
+
+```{r setup, include=FALSE}
+# Load knitr package
+library(knitr)
+
+# Knitr Options
+opts_chunk$set(
+	echo = TRUE,
+	message = FALSE,
+	warning = FALSE,
+	fig.align = 'center'
+)
+```
+
+# Summary
+Equipped with your understanding of the **general modeling framework**, in this chapter we'll cover basic linear regression where you'll keep things simple and model the outcome variable $y$ as a function of a single explanatory/predictor variable $x$. We'll use both categorical and numerical $x$ variables. The outcome variable of interest in this chapter will be teaching evaluation scores of instructors at the University of Texas, Austin.
+
+# Explaining Teaching Score with Age
+Earlier, you explored the relationship between teaching score and age via a **scatter plot**.
+
+```{r load-packages, message=FALSE, warning=FALSE}
+# Load packages
+library(tidyverse)
+library(moderndive)
+```
+
+```{r scatter-score-age}
+# Create a scatter plot of teaching score over age
+ggplot(evals, aes(x = age, y = score)) +
+  geom_point() +
+  labs(x = "age", y = "score",
+       title = "Teaching score over age")
+```
+
+You found that the relationship showed a correlation coefficient of **-0.107**, indicating a weakly negative relationship:
+
+```{r corr-score-age}
+evals %>% 
+  summarise(correlation = cor(age, score))
+```
+
+You also saw that the scatter plot suffers from **overplotting**. Let's keep this overplotting in mind as we move forward. Now, can you visually summarise the above relationship with a **best-fitting line**? That is, a line that cuts through the cloud of points, separating the **signal** from the **noise**? We can do this using a **regression line**.
+
+We can add a regression line to the `ggplot2` code by adding a `geom_smooth()` layer with `lm` for linear model and `se` equal `FALSE` to omit standard error bars (which are a concept for a more advance course).
+
+```{r scatter-score-age-lm}
+# Create a scatter plot of teaching score over age
+ggplot(evals, aes(x = age, y = score)) +
+  geom_point() +
+  labs(x = "age", y = "score",
+       title = "Teaching score over age") +
+  # Add a "best-fitting" line
+  geom_smooth(method = "lm", se = FALSE)
+```
+
+Observe. The overall relationship is negative; as ages increase, scores decrease. This is consistent with our computed correlation coefficient of -0.107. Now, does that mean aging directly causes decreases in score? Not necessarily, as there may be other factors we are not accounting for. Correlation does not equal causation.
+
+This best-fitting line is the **linear regression line** and it is a fitted linear model $\hat{f}()$. Let's draw connections with our earlier modeling theory.
+
+## Refresher: Modeling in General
+
+* **Truth:** Assumed model is $y=f(\vec{x})+\epsilon$
+* **Goal:** Given $y$ and $\vec{x}$, fit a model $\hat{f}(\vec{x})$ that *approximates* $f(\vec{x})$, where $\hat{y}=\hat{f}(\vec{x})$ is the *fitted/predicted* value for the *observed* value $y$.
+
+## Modeling with Basic Linear Regression
+
+* **Truth:** 
+    * Assume $f()$ is a linear function (i.e. a line), necessitating an *intercept* ($\beta_0$) and a *slope* for $x$ ($\beta_1$): $f(x)=\beta_0+\beta_1\cdot{x}$
+    * *Observed* value $y=f(x)+\epsilon=\beta_0+\beta_1\cdot{x}+\epsilon$ 
+* **Fitted:**
+    * Assume $\hat{f}(x)=\hat{\beta}_0+\hat{\beta}_1\cdot{x}$. These values are computed using our observed data.
+    * *Fitted/predicted* value $\hat{y}=\hat{f}(x)=\hat{\beta}_0+\hat{\beta}_1\cdot{x}$. Note that there is no $\epsilon$ term here as our fitted model $\hat{f}(x)$ should only capture signal and not noise.
+    
+The best-fitting line is thus:
+$\hat{y}=\hat{f}(\vec{x})=\hat{\beta}_0+\hat{\beta}_1\cdot{x}$
+
+But what are the numerical values of the fitted intercept and slope? We'll let R compute these for us.
+
+## Computing the Slope and Intercept of Regression Line
+You first fit an `lm` linear model using as arguments the data and a model formula of form `y ~ x`, where `y` is the outcome and `x` is the explanatory variable.
+
+```{r model-score-1}
+# Fit regression model using formula of form: y ~ x
+model_score_1 <- lm(score ~ age, data=evals)
+# Output contents
+model_score_1
+```
+
+While the intercept of 4.46 has a mathematical interpretation, being the value of $y$ when $x=0$, here it doesn't have a practical interpretation (this would be the teaching `score` when `age` is 0). The slope of -0.005938 quantifies the relationship between `score` and `age`. Its interpretation is **rise over run**; for every increase of 1 in `age` there is an associated decrease of on average 0.0059 units in score. The negative slope emphasizes the negative relationship.
+
+However, the latter output is a bit sparse, and not in dataframe format. Let's improve thisby applying the `get_regression_table` function from the `moderndive` package to `model_score_1`.
+
+```{r model-score-1-regression-table}
+# Output regression table using wrapper function:
+kable(
+  get_regression_table(model_score_1))
+```
+This produces what is known as a **regression table**. This function is an example of a **wrapper function**. It takes other existing functions and hides its internal workings so that all you need to worry about are the input and output formats.
+
+The fitted intercept and slope are now in the second column `estimate`. The additional columns, such as `std_error` and `p_value` all speak to the statistical significance of our results. These concepts are covered in more advanced courses on statistical inference.
+
+# Plotting a Best-fitting Regression Line
+Previously you visualised the relationship of teaching score and "beauty score" via a scatterplot. Now let's add a "best-fitting" regression line to provide a sense of any overall trends. Even though you know this plot suffers from overplotting, you'll stick to the non-`jitter` version.
+
+```{r scatter-score-bty}
+# Plot
+ggplot(evals, aes(x = bty_avg, y = score)) +
+  geom_point() +
+  labs(x = "beauty score", y = "score") +
+  geom_smooth(method = "lm", se = FALSE)
+```
+
+The overall trend seems to be positive. As instructors have higher "beauty" scores, so also do they tend to have higher teaching scores.
+
+# Fitting a Regression with a Numerical $x$
+Let's now explicitly quantify the linear relationship between `score` and `bty_avg` using linear regression. You will do this by first "fitting" the model. Then you will get the *regression table*, a standard output in many statistical software packages. Finally, based on the output of `get_regression_table()`, which interpretation of the slope coefficient is correct?
+
+```{r model-score-2}
+# Fit model
+model_score_2 <- lm(score ~ bty_avg, data = evals)
+
+# Output content
+model_score_2
+```
+
+Given the sparsity of the output, let's get the regression table using the `get_regression_table()` wrapper function.
+
+```{r model_score_2_regression_table}
+kable(get_regression_table(model_score_2))
+```
+
+From this we can conclude that for every increase of one in beauty score, we can observe an associated increase of on average 0.067 units in teaching score.
+
+# Predicting Teaching Score Using Age
+Let's take our basic linear regression model of `score` as a function of `age` and now use it to **predict** events. For example, say we have demographic information about a professor at UT Austin. Can you make a good guess of their score? Or, more generally, based on a single predictor variable $x$ can you make good predictions $\hat{y}$?
+
+Recall, our best-fitting regression line from the last section:
+
+```{r scatter-score-age-2, echo=FALSE}
+# Create a scatter plot of teaching score over age
+ggplot(evals, aes(x = age, y = score)) +
+  geom_point() +
+  labs(x = "age", y = "score",
+       title = "Teaching score over age") +
+  # Add a "best-fitting" line
+  geom_smooth(method = "lm", se = FALSE)
+```
+Now, say all you know about an instructor is that they are aged 40. What is a good guess of their score? Can you use the above visualisation? A good guess is the fitted value on the regression line for `age = 40`. This is approximately 4.25. To compute this precisely, you need to use the fitted intercept and fitted slope for age from the regression table.
+
+## Refresher: Regression Table
+[Previously](#modeling-with-basic-linear-regression) you learned how to fit a linear regression model with one numerical explanatory variable and applied the `get_regression_table()` function from the `moderndive` package to obtain the fitted intercept and fitted slope values:
+
+```{r model-score-1-regression-table-2, echo=FALSE}
+# Output regression table using wrapper function:
+kable(
+  get_regression_table(model_score_1))
+```
+
+Recall that these values are in the `estimate` column and are 4.46 and -0.006.
+
+## Predicted Value
+More generally, you can use a fitted regression model $\hat{f}()$ for predictive as well as explanatory purposes:
+
+* Predictive regression models in general:<br>
+$\hat{y}=\hat{f}(x)=\hat{\beta}_0+\hat{\beta}_1\cdot{x}$
+* Our predictive model: $\hat{\text{score}}=4.46-0.006\cdot\text{age}$
+* Our prediction: $4.46-0.006\cdot40=4.22$
+
+This is very close to our earlier visual prediction of 4.25.
+
+## Prediction Error
+Now say we found out that the instructor actually got a score of 3.5. Our prediction of 4.22 **over-predicted** by approximately 0.72 units in the negative direction. What this demonstrates is the modeling concept of a **residual**.
