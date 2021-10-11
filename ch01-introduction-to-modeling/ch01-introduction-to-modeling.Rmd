@@ -4,12 +4,10 @@ subtitle: "Chapter 1: Introduction to Modeling"
 author: "Clare Gibson"
 date: "`r Sys.Date()`"
 output: 
-  html_document:
+  prettydoc::html_pretty:
     toc: true
-    number_sections: true
-    toc_float: true
-    theme: cosmo
-    code_folding: show
+    theme: architect
+    highlight: github
 ---
 
 ```{r setup, include=FALSE}
@@ -340,4 +338,49 @@ Observe. The group-level means exhibit a similar increasing pattern as the media
 
 To obtain this prediction in dollars however, you undo the log10-transform by raising 10 to the power 5.65 to get a predicted sale price of \$446k. But given the variation in prices within the condition 4 group, not all houses of condition 4 are exactly \$446k. In other words, this prediction is bound to have some error. Using our earlier terminology, the value 5.65 can be thought of as the "signal" and any difference between this prediction and the actual log10-price can be thought of as the "noise".
 
-Let's close out this introductory chapter with further exercises on exploratory data analysis for modeling for prediction. 
+Let's close out this introductory chapter with further exercises on exploratory data analysis for modeling for prediction.
+
+## EDA of Relationship of House Price and Waterfront
+Let's now perform an exploratory data analysis of the relationship between `log10_price`, the log base 10 house price, and the binary variable `waterfront`. Let's look at the raw values of `waterfront` and then visualize their relationship.
+
+Visualize the relationship between `waterfront` and `log10_price` using an appropriate `geom_*` function. Remember that `waterfront` is categorical.
+
+```{r glimpse-waterfront}
+# View the structure of log10_price and waterfront
+house_prices %>%
+  select(log10_price, waterfront) %>%
+  glimpse()
+```
+
+```{r boxplot-price-waterfront}
+# Plot 
+ggplot(house_prices, aes(x = waterfront, y = log10_price)) +
+  geom_boxplot() +
+  labs(x = "waterfront", y = "log10 price")
+```
+
+Observe. Houses that have a view of the waterfront tend to be much more expensive than those without a waterfront view, as evidenced by the much higher log10 price.
+
+## Predicting House Price with Waterfront
+You just saw that houses with a view of the `waterfront` tend to be much more expensive. But by how much? Let's compute group means of `log10_price`, convert them back to dollar units, and compare!
+
+Return both the mean of `log10_price` and the count of houses in each level of `waterfront`.
+
+```{r mean-waterfront}
+# Calculate stats
+house_prices %>%
+  group_by(waterfront) %>%
+  summarize(mean_log10_price = mean(log10_price), n = n())
+```
+
+Using these group means for `log10_price`, return "good" predicted house prices in the original units of US dollars.
+
+```{r prediction-waterfront}
+# Prediction of price for houses with view
+10^(6.124689)
+
+# Prediction of price for houses without view
+10^(5.663114)
+```
+
+Most houses don't have a view of the `waterfront` (n = 21,450), but those that do (n = 163) have a much higher predicted price. Look at that difference! \$457,088 versus \$1,318,257! In the upcoming Chapter 2 on basic regression, we'll build on such intuition and construct our first formal explanatory and predictive models using basic regression!
