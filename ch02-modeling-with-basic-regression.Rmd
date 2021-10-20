@@ -3,11 +3,10 @@ title: "Datacamp: Modeling with Data in the Tidyverse"
 subtitle: "Chapter 2: Modeling with Basic Regression"
 author: "Clare Gibson"
 date: "`r Sys.Date()`"
-output: 
-  prettydoc::html_pretty:
+output:
+  html_document:
+    theme: paper
     toc: true
-    theme: architect
-    highlight: github
 ---
 
 ```{r setup, include=FALSE}
