@@ -102,8 +102,7 @@ However, the latter output is a bit sparse, and not in dataframe format. Let's i
 
 ```{r model-score-1-regression-table}
 # Output regression table using wrapper function:
-kable(
-  get_regression_table(model_score_1))
+kable(get_regression_table(model_score_1))
 ```
 This produces what is known as a **regression table**. This function is an example of a **wrapper function**. It takes other existing functions and hides its internal workings so that all you need to worry about are the input and output formats.
 
@@ -180,3 +179,169 @@ This is very close to our earlier visual prediction of 4.25.
 
 ## Prediction Error
 Now say we found out that the instructor actually got a score of 3.5. Our prediction of 4.22 **over-predicted** by approximately 0.72 units in the negative direction. What this demonstrates is the modeling concept of a **residual**.
+
+## Residuals as Model Errors
+A residual is the **observed value** $y$ minus the **fitted or predicted value** $\hat{y}$. This discrepancy between the two values corresponds to the $\epsilon$ from the general modeling framework. Here the negative residual of -0.72 corresponds to our over-prediction. With linear regression, sometimes you'll obtain positive residuals and sometimes negative. In linear regression these residuals always average out to 0.
+
+* Residual = $y - \hat{y}$.
+* Corresponds to the $\epsilon$ from the general modeling framework $y=f(\vec{x})+\epsilon$.
+* For our example instructor: $y-\hat{y}=3.5-4.22=-0.72$.
+* In linear regression, they are on average 0.
+
+Now, say you want predicted $\hat{y}$ and residuals for all 463 instructors. You could repeat the procedure we just followed 463 times but this would be tedious. So let's automate this procedure using another wrapper function from the `moderndive` package.
+
+## Computing All Predicted Values
+Recall, our earlier fitted linear model, saved in the variable `model_score_1`. Instead of using `get_regression_table()`, let's now use `get_regression_points()` to get information on all 463 points in our datset.
+```{r model-score-1-points}
+# Fit regression model using formula of form: y ~ x
+model_score_1 <- lm(score ~ age, data=evals)
+# Get information on each point
+model_score_1 %>% 
+  get_regression_points() %>% 
+  head(10) %>% 
+  kable()
+```
+
+The first column `ID` identifies the rows. The second and third columns are the original outcome and explantory variables `score` and `age`. The fourth column `score_hat` is the predicted $\hat{y}$ as computed using the equation of the regression line. The fifth column is the residual, `score - score_hat`.
+
+Let's go back to our original scatter plot and illustrate a few more residuals. Here's we'll plot six arbitrarily chosen residuals.
+
+<center>
+![Image 1: Six residuals](images/residuals.png)
+</center>
+
+Our earlier statement that the regression line is **best-fitting** means that of all possible lines, the blue regression line **minimizes** the residuals. What do I mean by minimize? Imagine you drew all 463 residuals, then squared their lengths so that positive and negative residuals were treated equally, then summed them. The regression line is the line that minimizes this quantity. You'll see later that this quantity is called the **sum of squared residuals** and it measures the lack of fit of a model to a set of points. The blue regression line is best in that it minimizes this lack of fit.
+
+# Making Predictions Using Beauty Score
+Say there is an instructor at UT Austin and you know nothing about them except that their beauty score is 5. What is your prediction $\hat{y}$ of their teaching score $y$?
+```{r model-score-2-regression-table-2}
+get_regression_table(model_score_2)
+```
+
+Using the values of the intercept and slope from above, predict this instructor's score.
+```{r predict-score-with-bty}
+# Use fitted intercept and slope to get a prediction
+y_hat <- 3.88 + 0.067 * 5
+y_hat
+```
+
+Say it's revealed that the instructor's score is 4.7. Compute the residual for this prediction, i.e., the residual $y-\hat{y}$.
+```{r residual-with-age}
+# Use fitted intercept and slope to get a prediction
+y_hat <- 3.88 + 5 * 0.0670
+y_hat
+
+# Compute residual y - y_hat
+4.7 - 4.215
+```
+
+# Computing Fitted/Predicted Values & Residuals
+Now say you want to repeat this for all 463 instructors in `evals`. Doing this manually as you just did would be long and tedious, so as seen in the video, let's automate this using the `get_regression_points()` function.
+
+Furthemore, let's unpack its output.
+
+* Let's once again get the regression table for `model_score_2`.
+* Apply `get_regression_points()` from the `moderndive` package to automate making predictions and computing residuals.
+```{r predict-all-scores-with-bty}
+# Fit regression model
+model_score_2 <- lm(score ~ bty_avg, data = evals)
+
+# Get regression table
+get_regression_table(model_score_2)
+
+# Get all fitted/predicted values and residuals
+get_regression_points(model_score_2)
+```
+
+
+* Let's unpack the contents of the `score_hat` column. First, run the code that fits the model and outputs the regression table.
+* Add a new column `score_hat_2` which replicates how `score_hat` is computed using the table's values.
+```{r predict-all-scores-with-bty-2}
+# Fit regression model
+model_score_2 <- lm(score ~ bty_avg, data = evals)
+
+# Get regression table
+get_regression_table(model_score_2)
+
+# Get all fitted/predicted values and residuals
+get_regression_points(model_score_2) %>% 
+  mutate(score_hat_2 = 3.88 + 0.067 * bty_avg)
+```
+
+* Now let's unpack the contents of the `residual` column. First, run the code that fits the model and outputs the regression table.
+* Add a new column `residual_2` which replicates how `residual` is computed using the table's values.
+```{r predict-all-scores-with-bty-3}
+# Fit regression model
+model_score_2 <- lm(score ~ bty_avg, data = evals)
+
+# Get regression table
+get_regression_table(model_score_2)
+
+# Get all fitted/predicted values and residuals
+get_regression_points(model_score_2) %>% 
+  mutate(residual_2 = score - score_hat)
+```
+
+# Explaining Teaching Score with Gender
+Let's now expand your modeling toolbox with basic regression models where the explanatory/predictor variable is not numerical, but rather **categorical**. Much of the world's data is categorical in nature and its important to be equipped to handle it. You'll continue constructing explanatory and predictive models of teaching score, now using the variable gender, which at the time of this study was recorded as a binary categorical variable.
+
+## Exploratory Data Visualization
+As we similarly did in Chapter 1 for house price and house condition, let's construct an exploratory boxplot of the relationship between score and gender.
+```{r boxplot-score-gender}
+ggplot(evals, aes(x=gender, y=score)) +
+  geom_boxplot() +
+  labs(x="gender", y="score")
+```
+
+You can easily compare the distribution of scores for men and women using single horizontal lines. For example, it seems male instructors tended to get higher scores as evidenced by the higher median. Remember, the solid line in boxplots are the median, not the mean. So before I perform any formal regression modeling, I expect men will tend to be rated higher than women by students. Let's make a mental note: treating the median for women of about 4.1 as a "baseline for comparison", I observe a difference of about +0.2 for men. These aren't exact values, just a rough eyeballing.
+
+## Facetted Histogram
+An alternative exploratory visualization is a facetted histogram. You use `geom_histogram()`, where `x` maps to the numerical variable `score`, and where we now have facets split by gender.
+```{r facetted-hist-score-gender}
+ggplot(evals, aes(x=score)) +
+  geom_histogram(binwidth=0.25) +
+  facet_wrap(~gender) +
+  labs(x="gender", y="score")
+```
+
+Unlike the boxplots, you now get a sense for the shape of the distributions. They both exhibit a slight **left-skew**. Nothing drastic like the right-skew of Seattle house prices, but still a slight skew nonetheless. However, it's now harder to say which distribution is centered at a higher point. This is because the median isn't clearly marked like in boxplots. Furthermore, comparisons between groups can't be made using single lines. So which plot is better? Boxplots or facetted histograms? There is no universal right answer; it all depends on what you are trying to emphasize to the consumers of these visualizations.
+
+## Fitting a regression model
+You fit the regression as before where the model formula `y ~ x` in this case has `x` set to `gender`.
+```{r model-score-3-gender}
+# Fit regression model
+model_score_3 <- lm(score~gender, data=evals)
+
+# Get regression table
+model_score_3 %>% 
+  get_regression_table() %>% 
+  kable()
+```
+
+
+Using `get_regression_table()`, you see again the regression table yields a fitted intercept and a fitted slope, but what do these mean when the explanatory variable is categorical? The intercept 4.09 is the average score for the women, the "baseline for comparison" group. Why in this case is the baseline group female and not male? For no other reason than "female" is alphabetically ahead of "male". The slope of 0.142 is the difference in average score for men relative to women. This is known as a **dummy** or **indicator variable**. It is not that men had an average score of 0.142, rather they differed on average from the women by +0.142, so their average score is the sum of 4.09 + 0.142 = 4.23.
+
+## Fitting a regression model
+Let's convince ourselves of this by computing group means using the `group_by()` and `summarize()` verbs.
+```{r group-means-score-gender}
+# Compute group means based on gender
+evals %>% 
+  group_by(gender) %>% 
+  summarise(avg_score = mean(score)) %>% 
+  kable()
+```
+
+So, the latter table shows the means for men and women separately, whereas the regression table shows the average teaching score for the baseline group of women, and the relative difference to this baseline for the men.
+
+## A Different Categorical Explanatory Variable: `rank`
+Let's now consider a different categorical variable: `rank`. Let's group the `evals` data by `rank` and obtain counts using the `n()` function in the `summarize` call.
+```{r count-rank}
+# Get a count of records by rank
+evals %>% 
+  group_by(rank) %>% 
+  summarise(n = n()) %>% 
+  kable()
+```
+
+Observe three levels: First **teaching** instructors responsibilities' lie primarily only in teaching courses. Second, **tenure track** faculty also have research expectations and, generally speaking, are on the path to getting promoted to the third rank and highest, **tenured**.
+

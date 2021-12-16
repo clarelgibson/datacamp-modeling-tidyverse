@@ -244,9 +244,7 @@ Observe there are indeed two values at age 70 and score 4.6. Other overplotted p
 A correlation coefficient is a summary statistic between -1 and 1 measuring the strength of linear association of two numerical variables, or the degree to which points fall on a line. 
 
 <center>
-
 ![Image 1: Examples of correlation](images/correlation.png)
-
 </center>
 
 In the top left plot where the correlation is -1, the points fall perfectly on a negatively sloped line. So as values of x increase, values of y decrease in lock-step. In the bottom right plot where the correlation is +1, the relationship is perfectly positive. In the middle where the correlation is 0, there is no relationship; x and y behave independently. The remaining plots illustrate other in-between values.
