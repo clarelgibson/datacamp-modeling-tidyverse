@@ -345,3 +345,51 @@ evals %>%
 
 Observe three levels: First **teaching** instructors responsibilities' lie primarily only in teaching courses. Second, **tenure track** faculty also have research expectations and, generally speaking, are on the path to getting promoted to the third rank and highest, **tenured**.
 
+# EDA of Relationship of Score and Rank
+Let's perform an EDA of the relationship between an instructor's score and their rank in the `evals` dataset. You'll both visualize this relationship and compute summary statistics for each level of `rank`: `teaching`, `tenure track`, and `tenured`.
+
+Write the code to create a boxplot of the relationship between teaching `score` and `rank`.
+```{r boxplot-score-rank}
+ggplot(evals, aes(rank, score)) +
+  geom_boxplot() +
+  labs(x="rank", y="score")
+```
+
+For each unique value in `rank`:
+
+* Count the number of observations in each group
+* Find the mean and standard deviation of `score`
+```{r summarise-rank}
+evals %>% 
+  group_by(rank) %>% 
+  summarise(n = n(),
+            mean_score = mean(score, na.rm=TRUE),
+            sd_score = sd(score, na.rm=TRUE))
+```
+
+# Fitting a Regression With a Categorical `x`
+You'll now fit a regression model with the categorical variable `rank` as the explanatory variable and interpret the values in the resulting regression table. Note here the rank "teaching" is treated as the *baseline for comparison group* for the "tenure track" and "tenured" groups.
+
+Fit a linear regression model between `score` and `rank`, and then apply the wrapper function to `model_score_4` that returns the regression table.
+```{r lm-score-rank}
+# fit regression model
+model_score_4 <- lm(score ~ rank,
+                    data = evals)
+
+# Get regressions table
+kable(get_regression_table(model_score_4))
+```
+
+Based on the regression table, compute the 3 possible fitted values $\hat{y}$, which are the group means. Since "teaching" is the *baseline for comparison group*, the intercept is the mean score for the "teaching" group and `ranktenure track`/`ranktenured` are relative offsets to this baseline for the "tenure track"/"tenured" groups.
+```{r fitted-values-rank}
+# teaching mean
+teaching_mean <- 4.28
+
+# tenure track mean
+tenure_track_mean <- 4.28 - 0.13
+
+# tenured mean
+tenured_mean <- 4.28 - 0.145
+```
+
+# Predicting Teaching Score Using Gender
