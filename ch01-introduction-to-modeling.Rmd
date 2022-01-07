@@ -7,6 +7,7 @@ output:
   html_document:
     theme: paper
     toc: true
+    toc_depth: 1
 ---
 
 ```{r setup, include=FALSE}
