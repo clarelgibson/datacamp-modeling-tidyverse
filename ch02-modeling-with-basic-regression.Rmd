@@ -7,6 +7,7 @@ output:
   html_document:
     theme: paper
     toc: true
+    toc_depth: 1
 ---
 
 ```{r setup, include=FALSE}
@@ -321,7 +322,7 @@ model_score_3 %>%
 
 Using `get_regression_table()`, you see again the regression table yields a fitted intercept and a fitted slope, but what do these mean when the explanatory variable is categorical? The intercept 4.09 is the average score for the women, the "baseline for comparison" group. Why in this case is the baseline group female and not male? For no other reason than "female" is alphabetically ahead of "male". The slope of 0.142 is the difference in average score for men relative to women. This is known as a **dummy** or **indicator variable**. It is not that men had an average score of 0.142, rather they differed on average from the women by +0.142, so their average score is the sum of 4.09 + 0.142 = 4.23.
 
-## Fitting a regression model
+## Computing the group means
 Let's convince ourselves of this by computing group means using the `group_by()` and `summarize()` verbs.
 ```{r group-means-score-gender}
 # Compute group means based on gender
@@ -393,3 +394,93 @@ tenured_mean <- 4.28 - 0.145
 ```
 
 # Predicting Teaching Score Using Gender
+You'll finish your exploration of basic regression with modeling for prediction using one categorical predictor variable. The idea remains the same as predicting with one numerical variable: based on information contained in the predictor variables, in this case `gender`, can you accurately guess teaching scores?
+
+You [previously](#computing-the-group-means) calculated gender specific means using `group_by()` and `summarise()`. This time however, let's also compute the standard deviation, which is a measure of spread.
+```{r group-sd-score-gender}
+# Compute group means based on gender
+evals %>% 
+  group_by(gender) %>% 
+  summarise(mean_score = mean(score),
+            sd_score = sd(score)) %>% 
+  kable()
+```
+
+On average, the male instructors got a score of 4.23 and the female instructors got a score of 4.09. Furthermore, there is variation around the mean scores as evidenced by the standard deviations. The women had slightly more variation with a standard deviation of 0.564.
+
+So say you had an instructor at the UT Austin and you knew nothing about them other than that they were male. A reasonable prediction of their teaching score would be the **group mean** for the men of 4.23.
+
+However, surely there are more factors associated with teaching scores than just gender? How good can this prediction be? There must be a fair amount of error involved.
+
+What was our method for quantifying error? It was the **residuals**. Let's get the predicted values and residuals for all 463 instructors.
+
+## Computing all Predicted Values and Residuals
+We use the `get_regression_points()` function that we introduced earlier.
+```{r predict-all-scores-with-gender}
+# Fit regression model
+model_score_3 <- lm(score~gender, data=evals)
+
+# Get information on each point
+model_score_3 %>% 
+  get_regression_points() %>%
+  head(10) %>% 
+  kable()
+```
+
+Recall that whereas `get_regression_table()` returns the regression table, `get_regression_points()` returns information on each of the 463 rows in the `evals` dataframe, each representing one instructor.
+
+In the second column is the observed $y$ outcome `score`. In the fourth column `score_hat`, observe that there are only two possible predicted values: either 4.09 or 4.23, corresponding to the group means for the women and men respectively. The final column contains the residuals, which are the observed values $y$ minus the predicted values $\hat{y}$, or here `score - score_hat`.
+
+In the first row, since the prediction 4.09 was **lower than** the observed value of 4.7, there is a **positive** residual, whereas in the third row, since the prediction of 4.09 was **greater than** the observed value of 3.9, there is a **negative** residual.
+
+Say you predicted a value that was exactly equal to the observed value. Then in this case the residual would be 0.
+
+## Histogram of Residuals
+Now let's take the output of the `get_regression_points()` function and save it into a new dataframe called `model_score_3_points`. This was you can use this dataframe in a `ggplot` function call to plot a histogram of the residuals
+```{r model-score-3-hist}
+# Save the regression points to a variable
+model_score_3_points <-
+  get_regression_points(model_score_3)
+
+# Plot residuals
+ggplot(model_score_3_points, aes(x = residual)) +
+  geom_histogram() +
+  labs(x = "Residuals",
+       title = "Residuals from score ~ gender model")
+```
+
+This histogram appears to be roughly centred at 0, indicating that on average the residuals (or errors) were 0. Sometimes we make errors as large as +1 or -1 out of a 5-unit scale. Those are fairly large. Also, note that we tend to make larger negative errors than positive errors. But these shortcomings are not necessarily bad. Remember, this is a very simplistic model with only one predictor: `gender`. The analysis of the residuals above suggests that we probably need more predictors than just gender to make good predictions of teaching scores. Wouldn't it be great if you could fit regression models where you could use more than one explanatory or predictor variable? You'll see in the upcoming Chapter 3 on **multiple regression** that you can.
+
+# Making Predictions Using Rank
+Run `get_regression_table(model_score_4)` in the console to regenerate the regression table where you modeled `score` as a function of `rank`. Now say using this table you want to predict the teaching score of an instructor about whom you know nothing except that they are a tenured professor. Which of these statements is true?
+```{r get-regression-table-model-score-4}
+# Get the regression table
+get_regression_table(model_score_4) %>% 
+  kable()
+```
+
+A good prediction of their `score` would be `4.28 - 0.145 = 4.135`.
+
+# Visualising the Distribution of Residuals
+Let's now compute both the predicted score $\hat{y}$ and the residual $y-\hat{y}$ for all $n=463$ instructors in the `evals` dataset. Furthermore, you'll plot a histogram of the residuals and see if there are any patterns to the residuals, i.e. your predictive errors.
+
+Apply the function that automates making predictions and computing residuals, and save these values to the dataframe `model_score_4_points`.
+```{r get-regression-points-model-score-4}
+# Get the regression points
+model_score_4_points <-
+  get_regression_points(model_score_4)
+
+# Print the first 10 rows
+model_score_4_points %>% 
+  head(10) %>% 
+  kable()
+```
+
+Now take the `model_score_4_points` dataframe to plot a histogram of the `residual` column so you can see the distribution of the residuals, i.e., the prediction errors.
+```{r model-score-4-hist}
+# Plot residuals
+ggplot(model_score_4_points, aes(x = residual)) +
+  geom_histogram() +
+  labs(x = "residuals", titlex = "Residuals from score ~ rank model")
+```
+
