@@ -1,0 +1,11 @@
+name: Publish Document
+title:
+username:
+account: rpubs
+server: rpubs.com
+hostUrl: rpubs.com
+appId: https://api.rpubs.com/api/v1/document/854386/2ac92593c2c046869f4baeeafb547d7a
+bundleId: https://api.rpubs.com/api/v1/document/854386/2ac92593c2c046869f4baeeafb547d7a
+url: http://rpubs.com/SurreyDataGirl/854386
+when: 1641808894.92505
+lastSyncTime: 1641808894.92507
