@@ -80,7 +80,10 @@ You computed this value explicitly in a [previous section](https://rstudio-pubs-
 # Model 1
 get_regression_points(model_price_1) %>% 
   mutate(sq_residuals = residual ^ 2) %>% 
-  summarise(sum_sq_residuals = sum(sq_residuals))
+  summarise(sum_sq_residuals = sum(sq_residuals)) %>% 
+  kable(digits = 0,
+        align = "l",
+        caption = "Sum of squared residuals for Model 1")
 ```
 
 You saw that this model's sum of squared residuals was **585**, a number that is a bit hard to make sense of on its own.
@@ -90,7 +93,10 @@ However, let's compute the sum of squared residuals for `model_price_3` as well,
 # Model 3
 get_regression_points(model_price_3) %>% 
   mutate(sq_residuals = residual ^ 2) %>% 
-  summarise(sum_sq_residuals = sum(sq_residuals))
+  summarise(sum_sq_residuals = sum(sq_residuals)) %>% 
+  kable(digits = 0,
+        align = "l",
+        caption = "Sum of squared residuals for Model 3")
 ```
 
 The sum of squared residuals is now **608**. So it seems that Model 3, using the variable `condition`, has a bigger lack of fit, so is worse, suggesting that Model 1, using `yr_built`, is better. 
@@ -106,10 +112,13 @@ Let's remind you how to compute the sum of squared residuals. You'll do this for
 model_price_2 <- lm(log10_price ~ log10_size + bedrooms, 
                     data = house_prices)
 
-# Calculate suqared residuals
+# Calculate squared residuals
 get_regression_points(model_price_2) %>% 
   mutate(sq_residuals = residual ^ 2) %>% 
-  summarise(sum_sq_residuals = sum(sq_residuals))
+  summarise(sum_sq_residuals = sum(sq_residuals)) %>% 
+  kable(digits = 0,
+        align = "l",
+        caption = "Sum of squared residuals for Model 2")
 ```
 
 Now compute the sum of squared residuals for `model_price_4` which uses the categorical variable `waterfront` instead of the numerical variable `bedrooms`.
@@ -121,7 +130,10 @@ model_price_4 <- lm(log10_price ~ log10_size + waterfront,
 # Calculate squared residuals
 get_regression_points(model_price_4) %>% 
   mutate(sq_residuals = residual ^ 2) %>% 
-  summarise(sum_sq_residuals = sum(sq_residuals))
+  summarise(sum_sq_residuals = sum(sq_residuals)) %>% 
+  kable(digits = 0,
+        align = "l",
+        caption = "Sum of squared residuals for Model 4")
 ```
 
 Let's use these two measures of model assessment to choose between these two models, or in other words, perform model selection!
@@ -171,14 +183,20 @@ Let's compute the R-squared statistic for both models we saw in the last Chapter
 ```{r model-price-1-rsq}
 # Model 1: price as a function of size and year built
 get_regression_points(model_price_1) %>% 
-  summarise(r_squared = 1 - var(residual)/var(log10_price))
+  summarise(r_squared = 1 - var(residual)/var(log10_price)) %>% 
+  kable(digits = 2,
+        align = "l",
+        caption = "R-Squared Value for Model 1")
 ```
 
 In both cases, the outcome variable $y$ is the observed `log10_price`. For Model 1, which used `log10_size` and `yr_built`, the $R^2$ is **0.483 or 48.3%**. So you can explain about half the total variation in house prices using Model 1.
 ```{r model-price-3-rsq}
 # Model 3: price as a function of size and condition
 get_regression_points(model_price_3) %>% 
-  summarise(r_squared = 1 - var(residual)/var(log10_price))
+  summarise(r_squared = 1 - var(residual)/var(log10_price)) %>% 
+  kable(digits = 2,
+        align = "l",
+        caption = "R-Squared Value for Model 3")
 ```
 
 For Model 3, which used `condition` instead of `yr_built`, the $R^2$ is **0.462 or 46.2%**. Now a lower proportion of the total variation in house prices is explained by Model 3. Since R-squared values closer to 1 mean better fit, the results suggest you choose Model 1, and thus using size and year is preferred to using size and condition. This is the same conclusion reached as when you used sum of squared residuals as the assessment criteria. Note however, sometimes there are no models that yield R-squared values close to 1. Sometimes the phenomenon you are modeling is so complex, no choice of variables will capture its behavior, and thus you only get low R-squared values. 
@@ -190,7 +208,10 @@ Compute $R^2$ by summarizing the `residual` and `log10_price` columns.
 ```{r model-price-2-rsq}
 # Get fitted/values & residuals, compute R^2 using residuals
 get_regression_points(model_price_2) %>% 
-  summarise(r_squared = 1 - var(residual)/var(log10_price))
+  summarise(r_squared = 1 - var(residual)/var(log10_price)) %>% 
+  kable(digits = 2,
+        align = "l",
+        caption = "R-Squared Value for Model 2")
 ```
 
 You observed an R-squared value of **0.465**, which means that 46.5% of the total variability of the outcome variable log base 10 price can be explained by this model. 
@@ -200,7 +221,10 @@ Let's now compute $R^2$ for the one numerical and one categorical explanatory/pr
 ```{r model-price-4-rsq}
 # Get fitted/values & residuals, compute R^2 using residuals
 get_regression_points(model_price_4) %>% 
-  summarise(r_squared = 1 - var(residual) / var(log10_price))
+  summarise(r_squared = 1 - var(residual) / var(log10_price)) %>% 
+  kable(digits = 2,
+        align = "l",
+        caption = "R-Squared Value for Model 4")
 ```
 
 Since `model_price_4` had a higher $R^2$ of 0.470, it "fit" the data better. Since using waterfront explained a higher proportion of the total variance of the outcome variable than using the number of bedrooms, using waterfront in our model is preferred.
@@ -223,7 +247,10 @@ You've seen the computation of the sum of squared residuals for Model 1 a few ti
 # Mean squared error: use mean() instead of sum()
 get_regression_points(model_price_1) %>% 
   mutate(sq_residuals = residual^2) %>% 
-  summarise(mse = mean(sq_residuals))
+  summarise(mse = mean(sq_residuals)) %>% 
+  kable(digits = 2,
+        align = "l",
+        caption = "MSE for Model 1")
 ```
 
 You observe an MSE of **0.0271**, which is 585 divided by 21613, the total number of houses. Why is this called the MSE, and not the mean of squared residuals? No reason other than convention, they mean the same thing.
@@ -238,7 +265,9 @@ get_regression_points(model_price_1) %>%
   mutate(sq_residuals = residual^2) %>% 
   summarise(mse = mean(sq_residuals)) %>% 
   mutate(rmse = sqrt(mse)) %>% 
-  kable()
+  kable(digits = 2,
+        align = "l",
+        caption = "RMSE for Model 1")
 ```
 
 Note the added `mutate()` line of code to compute the `sqrt()`. This can be thought of as the "typical prediction error" our model will make and its units match the units of the outcome variable $y$. While the interpretation in our case of the units of log10 dollars might not be immediately apparent to everyone, you can imagine in many other cases it being very useful for these units match.
@@ -252,7 +281,9 @@ new_houses <- data_frame(
 )
 
 new_houses %>% 
-  kable()
+  kable(digits = 2,
+        align = "l",
+        caption = "New Houses Predictions")
 ```
 
 Recall that you apply the `get_regression_points()` function to `model_price_3`, but also with the `newdata` argument set to `new_houses`.
@@ -260,7 +291,9 @@ Recall that you apply the `get_regression_points()` function to `model_price_3`,
 # Get predictions
 get_regression_points(model_price_3,
                       newdata = new_houses) %>% 
-  kable()
+  kable(digits = 2,
+        align = "l",
+        caption = "Get Regression Points for New Houses using Model 3")
 ```
 
 You thus obtain predicted values `log10_price_hat` of 5.34 and 5.94. Now let's take this output and compute the RMSE by taking the residual, squaring them, taking the mean not the sum, and then square rooting.
@@ -278,4 +311,308 @@ You get the following error message:
 Error in mutate_impl(.data, dots) :
   Evaluation error: object 'residual' not found.
 ```
-It says the residual column is not found. Why is it not found? Because to compute residuals, you need both the predicted/fitted values y-hat, in this case log10-price-hat and the observed values y, in this case log10-price But if you don't have the latter, you can't compute the residuals, and hence you can’t compute the RMSE. This illustrates a key restriction in predictive modeling assessment: you can only assess the quality of predictions when you have access to the observed value y. You'll learn about a workaround to this issue shortly. 
+It says the residual column is not found. Why is it not found? Because to compute residuals, you need both the predicted/fitted values $\hat{y}$, in this case `log10_price_hat` and the observed values $y$, in this case `log10_price`. But if you don't have the latter, you can't compute the residuals, and hence you cannot compute the RMSE. This illustrates a key restriction in predictive modeling assessment: you can only assess the quality of predictions when you have access to the observed value $y$. You'll learn about a workaround to this issue shortly.
+
+# Computing the MSE and RMSE of a Model
+Just as you did earlier with $R^2$, which is a measure of model fit, let's now compute the root mean square error (RMSE) of our models, which is a commonly used measure of predictive error. Let's use the model of price as a function of size and number of bedrooms, `model_price_2`.
+
+Let's start by computing the mean squared error (`mse`), which is the mean of the squared `residual`.
+```{r model-price-2-mse}
+# Get all residuals, square them and take mean
+get_regression_points(model_price_2) %>% 
+  mutate(sq_residuals = residual ^ 2) %>% 
+  summarise(mse = mean(sq_residuals)) %>% 
+  kable(digits = 3,
+        align = "l",
+        caption = "MSE for Model 2")
+```
+
+Now that you've computed the mean squared error, let's compute the root mean squared error.
+```{r model-price-2-rmse}
+# Get all residuals, square them and take mean and square root
+get_regression_points(model_price_2) %>% 
+  mutate(sq_residuals = residual ^ 2) %>% 
+  summarise(mse = mean(sq_residuals),
+            rmse = sqrt(mse)) %>%
+  kable(digits = 3,
+        align = "l",
+        caption = "MSE and RMSE for Model 2")
+```
+
+The RMSE is **0.167**. You can think of this as the “typical” prediction error this model makes. 
+
+# Comparing the RMSE of Two Models
+As you did using the sum of squared residuals and $R^2$, let's once again assess and compare the quality of your two models using the root mean squared error (RMSE). Note that RMSE is more typically used in prediction settings than explanatory settings. 
+
+Based on the code provided that computes MSE and RMSE for `model_price_2`, compute the MSE and RMSE for `model_price_4`.
+```{r model-price-4-rmse}
+# MSE and RMSE for model_price_2
+get_regression_points(model_price_2) %>%
+  mutate(sq_residuals = residual^2) %>%
+  summarize(mse = mean(sq_residuals),
+            rmse = sqrt(mean(sq_residuals))) %>%
+  kable(digits = 3,
+        align = "l",
+        caption = "MSE and RMSE for Model 2")
+
+# MSE and RMSE for model_price_4
+get_regression_points(model_price_4) %>%
+  mutate(sq_residuals = residual^2) %>%
+  summarize(mse = mean(sq_residuals),
+            rmse = sqrt(mean(sq_residuals))) %>%
+  kable(digits = 3,
+        align = "l",
+        caption = "MSE and RMSE for Model 4")
+```
+
+Since `model_price_4` had a lower `rmse` of **0.166**, this is suggestive that this model has better predictive power. RMSE can be thought of as the 'typical' error a predicive model will make.
+
+# Validation Set Prediction Framework
+In this section, we will introduce the **validation set prediction framework**. This framework allows us to get a sense of how well a predictive model will perform, in our case on new, previously unseen houses. This forms the backbone of a well-known machine learning method for model assessment called **cross-validation**.
+
+## Validation Set Approach
+Use two independent datasets to :
+
+1. Train/fit your model
+2. Evaluate your model's predictive power (i.e. validate your model)
+
+The underlying idea of the validation set approach is to first fit or train a model on one set of data, but evaluate, or validate, its performance on a different set of data. If you use the same data to both train your model and evaluate its performance, you could imagine your model easily being **over-fitted** to this data. In other words, you construct a model that is so overly specific to one dataset that it wouldn't generalise well to other datasets. 
+
+## Training/Test Set Split
+Randomly split all $n$ observations (white) into:
+
+1. A *training set* (blue) to fit models
+2. A *test set* (orange) to make predictions on
+
+<center>
+![Training Set Split](images/training-set-split.png)
+</center>
+
+Say your dataset has $n$ observations. You **randomly** split the data into two sets: a **training set** in blue and a **test set** in orange. I will use the blue observations to train, or fit, our model. Then apply the model to get predictions $\hat{y}$ for the orange observations. Then for these orange observations again, you'll assess these predictions $\hat{y}$ by comparing them to the observed outcome variable $y$.
+
+By using independent training and test data as above, you can get a sense of a model's predictive performance on new data.
+
+## Training/Test Split in R
+Let's do this with some `dplyr` functions. You first use `slice_sample()` with `prop` set to `1` and `replace` set to `FALSE` to randomly sample 100% of the rows of `house_prices` without replacement. This has the effect of randomly shuffling the order of the rows.
+```{r train-test-sample}
+# Set random number generator seed value for reproducibility
+set.seed(76)
+
+# Randomly shuffle order of rows
+house_prices_shuffled <- house_prices %>% 
+  slice_sample(prop = 1, replace = FALSE)
+```
+
+You then set the training data to be the first 10,000 rows of `house_prices_shuffled` using `slice()`. You similarly set the test data to be the remaining 11,613 rows.
+```{r train-test-split}
+# Split into train and test
+train <- house_prices_shuffled %>% 
+  slice(1:10000)
+test <- house_prices_shuffled %>% 
+  slice(10001:21613)
+```
+
+Note that these two datasets have none of the original rows in common, and by randomly shuffling the rows before slicing, we have effectively randomly assigned the rows to `train` and `test`. Also, you are not limited to a rough 50/50 split between `train` and `test` as we just did here. We only did this for simplicity.
+
+## Training Models on Training Data
+Let's fit the same regression model as earlier using `log10_size` and `yr_built` as predictor variables. However, we set the data to be `train` and not `house_prices`. Let's then output the regression table.
+```{r model-price-1-train}
+# Train Model 1
+train_model_price_1 <- lm(log10_price ~ log10_size + yr_built,
+                          data = train)
+
+get_regression_table(train_model_price_1) %>% 
+  kable(digits = 2,
+        align = "l",
+        caption = "Training summary for Model 1")
+```
+
+You again obtain values for the intercept and the slopes for `log10_size` and `yr_built` in the `estimate` column, but these values are slightly different than before when using all of the `house_prices` data, as they are based on a randomly chosen subset of points in the training data.
+
+## Making Predictions on Test Data
+Let's then apply this model to the test data to make predictions. In other words, take all 11,613 houses in `test` and compute the predicted values `log10_price_hat`. Recall from earlier, that you can do this quickly by using the `get_regression_points()` function with the `newdata` argument set to `test`.
+```{r model-price-1-test}
+# Train model on train
+train_model_price_1 <- lm(log10_price ~ log10_size + yr_built,
+                          data = train)
+
+# Get predictions on test
+get_regression_points(train_model_price_1,
+                      newdata = test) %>% 
+  head(10) %>% 
+  kable(digits = 2,
+        align = "l",
+        caption = "First 10 Predictions for Test Data")
+```
+
+You observe a `log10_price_hat` column of predicted values and the corresponding residuals. Note that since you have both the predicted values $\hat{y}$, in this case `log10_price_hat`, and the observed values $y$, in this case `log10_price`, you can compute the residuals in the final column.
+
+## Assessing Predictions with RMSE
+Let's now compute the RMSE to assess our predictions as before. You first `mutate()` a new column for the squared residuals, then you `summarise()` these values with the square root of their mean, in this case in a single `mutate()` step.
+```{r model-price-1-test-rmse}
+# Train model on train
+train_model_price_1 <- lm(log10_price ~ log10_size + yr_built,
+                          data = train)
+
+# Get predictions and compute RMSE on test
+get_regression_points(train_model_price_1,
+                      newdata = test) %>% 
+  mutate(sq_residuals = residual ^ 2) %>% 
+  summarise(rmse = sqrt(mean(sq_residuals))) %>% 
+  kable(digits = 3,
+        align = "l",
+        caption = "RMSE for Model 1 Test Data")
+```
+
+The RMSE is **0.164**.
+
+## Comparing RMSEs
+Let's now repeat this for the model that used `condition` instead of `year` and compare the RMSEs. You again fit the model to the training data and then use the `get_regression_points()` function with the `newdata` argument set to `test` to make predictions and you compute the RMSE.
+```{r model-price-3-rmse}
+# Train model on train
+train_model_price_3 <- lm(log10_price ~ log10_size + condition,
+                          data = train)
+
+# Get predictions and compute RMSE on test
+get_regression_points(train_model_price_3,
+                      newdata = test) %>% 
+  mutate(sq_residuals = residual ^ 2) %>% 
+  summarise(rmse = sqrt(mean(sq_residuals))) %>% 
+  kable(digits = 3,
+        align = "l",
+        caption = "RMSE for Model 3 Test Data")
+```
+
+This RMSE of **0.168** is larger than the previous one of **0.164** suggesting that using `condition` instead of `yr_built` yields worse predictions.
+
+# Fitting Model to Training Data
+It's time to split your data into a *training set* to fit a model and a separate *test set* to evaluate the predictive power of the model. Before making this split however, we first sample 100% of the rows of `house_prices` without replacement and assign this to `house_prices_shuffled`. This has the effect of "shuffling" the rows, thereby ensuring that the training and test sets are *randomly* sampled.
+
+Use `slice()` to set `train` to the first 10,000 rows of `house_prices_shuffled` and `test` to the remainder of the 21,613 rows.
+```{r train-test-sample-2}
+# Set random number generator seed value for reproducibility
+set.seed(76)
+
+# Randomly reorder the rows
+house_prices_shuffled <- house_prices %>% 
+  slice_sample(prop = 1, replace = FALSE)
+
+# Train/test split
+train <- house_prices_shuffled %>%
+  slice(1:10000)
+test <- house_prices_shuffled %>%
+  slice(10001:21613)
+```
+
+Now fit a linear regression to predict `log10_price` using `log10_size` and `bedrooms` using just the training data.
+```{r model-price-2-fit}
+# Fit model to training set
+train_model_price_2 <- lm(log10_price ~ log10_size + bedrooms,
+                          data = train)
+```
+
+Since you've fit/trained the predictive model on the training set, let's now apply it to the test set to make predictions!
+
+# Predicting on Test Data
+Now that you've trained the model on the `train` set, let's apply the model to the `test` data, make predictions, and evaluate the predictions. Recall that having a separate `test` set here simulates the gathering of a "new" independent dataset to test our model's predictive performance on.
+
+Use the `get_regression_points()` function to apply `train_model_2` on your new dataset: `test`.
+```{r model-price-2-test}
+# Make predictions on test set
+get_regression_points(train_model_price_2,
+                      newdata = test) %>% 
+  head(10) %>% 
+  kable(digits = 2,
+        align = "l",
+        caption = "First 10 Predictions for Testing Data for Model 2")
+```
+
+Compute the root mean square error using this output.
+```{r model-price-2-rmse-2}
+# Make predictions on test set
+get_regression_points(train_model_price_2,
+                      newdata = test) %>% 
+  mutate(sq_residuals = residual ^ 2) %>% 
+  summarise(rmse = sqrt(mean(sq_residuals))) %>% 
+  kable(digits = 3,
+        align = "l",
+        caption = "RMSE for Model 2")
+```
+
+Your RMSE using `size` and `condition` as predictor variables is **0.167**, which is higher than the **0.165** when you used `size` and `yr_built`. It seems the latter is marginally better!
+
+# Conclusion - Where to Go From Here?
+Congratulations on completing this course. In this course we leveraged the data science toolbox you developed in previous courses to perform exploratory data analysis, fit both explanatory and predictive models and study methods for model assessment and selection. But where can we go from here?
+
+## R Source Code for all Videos
+First, a great way to learn how to code in a new language is to find code that you know works, then copy it, paste it and tweak it to serve your goals. To help facilitate your new R modeling skills using the Tidyverse, we have included all the R source code used for the videos in this course on [Github](http://bit.ly/modeling_tidyverse).
+
+Second, here are links to other Datacamp courses that use the Tidyverse:
+
+* [Tidyverse Fundamentals with R](https://learn.datacamp.com/skill-tracks/tidyverse-fundamentals)
+* [Intermediate Tidyverse Toolbox](https://learn.datacamp.com/skill-tracks/intermediate-tidyverse-toolbox)
+
+Being an effective data scientist requires you to develop a wide array of tools for your data science toolbox. And a lot of practice, practice, practice! These courses will help in this journey.
+
+## Refresher: General Modeling Framework
+$$
+y=f(\vec{x})+\epsilon
+$$
+Perhaps the theory behind modeling interests you more. For example, recall our general modeling framework which, at its heart, has a function $f()$ making explicit the relationship between $y$ and $x$. We kept things simple and only studied models where $f()$ was linear:
+
+$$
+y=\beta_0+\beta_1\cdot{x_1}+\epsilon
+$$
+
+But by no means is one restricted to such models. What do we mean?
+
+## Parallel Slopes Model
+Recall our parallel slopes model for house price as a function of size and condition.
+
+<center>
+![Parallel Slopes Model](images/price-condition-scatter-multi-regression.png)
+</center>
+
+But why restrict ourselves to parallel lines?
+
+## Polynomial Model
+<center>
+![Polynomial Model](images/polynomial-model.png)
+</center>
+
+Here we have something known as a **ploynomial model**, where we allow for curvature by incorporating `log10_size` squared as an explanatory or predictor variable. This gives our model more flexibility.
+
+## Tree Models
+<center>
+![Tree Model](images/tree-model.png)
+</center>
+
+Furthermore, we are not restricted to models based on lines either. Yet another form of model are **trees**. Tree models are a form of triage. You start at the top of the tree and based on answers to true/false questions you progress down branches of the tree, where if the answer is true you go left and if the answer is false you go right.
+
+For example, say a house has log-10 size equal to 3.2. Since $3.2\lt3.387=\text{True}$, you first go down the left branch. Next since $3.2\lt3.184=\text{False}$, you then go down the right branch. This model's fitted or predicted value of the house's log-10 price is **5.642** or about $438,000. Repeating this triage for all 21,000 houses, there are 8,875 houses that fall into this final branch.
+
+## Datacamp Courses Using Other Models
+We have only scratched the surface of possible other models to consider. Here are some other Datacamp courses you can take that consider more complex, but also potentially more powerful, models:
+
+* [Machine Learning with Tree-Based Models in R](https://www.datacamp.com/courses/machine-learning-with-tree-based-models-in-r)
+* [Supervised Learning in R: Case Studies](https://www.datacamp.com/courses/supervised-learning-in-r-case-studies)
+
+## Refresher: Regression Table
+```{r regression-table-model-score-1}
+# Fit model
+model_score_1 <- lm(score ~ age,
+                    data = evals)
+
+# Output regression table
+get_regression_table(model_score_1) %>% 
+  kable(digits = 3,
+        align = "l",
+        caption = "Example of Regression Table")
+```
+
+Recall the regression table of the model of teaching score as a function of age. We only looked at values in the `estimate` column like the negative slope for `age` of -0.006, suggesting that as professors age, they tend to have lower teaching scores.
+
+But what do the other columns tell us? They speak to the **statistical significance** of our results. For example, can we conclusively say that `age` and `score` are negatively related for all instructors? Or was this relationship just a fluke occurrence for these 463 instructors? How would these results differ if we selected 463 different instructors? To be able to answer questions like these, we need to understand **statistical inference**.
+
+## Moderndive: Online Textbook
+If you are interested in statistical inference, we suggest you check out [ModernDive](https://moderndive.com/), an electronic textbook that Chester Ismay and I co-authored. ModernDive uses the same Tidyverse tools as in this course, expands on the regression models from this course and others, uses the `evals` and `house_prices` datasets (and more) all towards the goal of learning statistical inference via data science.
